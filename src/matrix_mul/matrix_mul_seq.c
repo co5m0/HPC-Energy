@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-#define N 10
+#define N 1024
 
 
-double main(int argc, char **argv) {
-clock_t begin = clock();
+int main(int argc, char **argv) {
+srand(1);
 int i,j,k, n, x;
 
 if(argc>1){
@@ -30,12 +30,13 @@ for( x=0;x<n;x++){
 //initialization
 for (i=0;i<n;i++){
     for (j=0;j<n;j++) {
-        a[i][j]= (double)rand()/5-2.0; //min -2 and max 2
-        b[i][j]=(double)rand()/5-1.0; //min -1 and max 3
+         a[i][j] = ((double) rand()*(5)/(double)RAND_MAX-2);
+            b[i][j] = ((double) rand()*(5)/(double)RAND_MAX-2);
     }
 }
 
 //calculate prod
+clock_t begin = clock();
  for (i=0;i<n;i++){ 
         for(j=0;j<n;j++) {
             c[i][j]=0;
@@ -44,7 +45,7 @@ for (i=0;i<n;i++){
             }
     }
  }
-
+clock_t end = clock();
  /*
  printf("MATRIX - A\n");
  for (i=0;i<n;i++) {
@@ -73,8 +74,8 @@ for (i=0;i<n;i++) {
         printf("\n");
 } 
 */
-clock_t end = clock();
+
 double time_spent = (double)(end-begin)/CLOCKS_PER_SEC;
-printf("Time exec: %f sec\n", time_spent);
+printf("Time exec: %f sec, Matrix size: %d\n", time_spent,n);
 
 }           

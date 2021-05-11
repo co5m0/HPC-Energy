@@ -34,7 +34,7 @@ void matmul_tiled(double **a, double **b, double **c, int n, int s)
 
 int main(int argc, char** argv)
 {
-    
+    srand(1);
     int n,s;
     double **a, **b, **c;
     int i, j, k,x;
@@ -61,8 +61,8 @@ for( x=0;x<n;x++){
 
     for (i = 0; i < n; i++) {
         for (j = 0; j < n; j++) {
-            a[i][j] =  (double)rand()/5-2.0; //min -2 and max 2
-            b[i][j] = (double)rand()/5-1.0; //min -1 and max 3
+            a[i][j] = ((double) rand()*(5)/(double)RAND_MAX-2);
+            b[i][j] = ((double) rand()*(5)/(double)RAND_MAX-2);
         }
     }
 
@@ -77,6 +77,6 @@ for( x=0;x<n;x++){
     time_spent = (end - begin);
     //printMatrix(c, N);
     //printf("<---------------->\n"); 
-    printf("\nMatrix size %d, tile size %d time spent %lf s\n\n", n,s, time_spent);
+    printf("Time exec: %f sec, Matrix size: %d, Tile size: %d  s\n\n",time_spent,n,s);
     return 0;
 }

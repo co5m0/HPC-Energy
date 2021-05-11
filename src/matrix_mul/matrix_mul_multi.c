@@ -1,56 +1,90 @@
-//padding size = 64 bytes / size of type of data
-//ex. int --> 64/4 = 16 bytes of padding
-
 #include <stdio.h>
-#include <omp.h>
 #include <time.h>
+#include <stdlib.h>
+#include <omp.h>
+#define N 1024
+#define NTHREADS 4
 
-#define nThreads 7
-#define N 100000
+int main(int argc, char **argv) {
+srand(1);
+int i,j,k, n, x;
+int nThreads;
 
-int main()
-{
-
-    int a[N];
-
-    for (int i = 0; i < N; i++)
-    {
-        a[i] = 1;
-    }
-
-    double start = omp_get_wtime();
-    int sum = 0;
-    int s = 0;
-    int result[nThreads * 16];
-
-#pragma omp parallel num_threads(nThreads)
-    {
-        int t = omp_get_thread_num();
-#pragma omp for
-        for (int i = 0; i < N; i++)
-        {
-            result[t * 16] += a[i];
-        }
-        //printf("Result %d\n", result[t * 16]);
-    }
-
-    for (int i = 0; i < nThreads; i++)
-    {
-        sum += result[i * 16];
-    }
-    printf("Sum %d\n", sum);
-    double end = omp_get_wtime();
-    double start2 = omp_get_wtime();
-
-#pragma omp parallel for reduction(+ \
-                                   : s)
-    for (int i = 0; i < N; i++)
-    {
-        s = s + a[i];
-    }
-    printf("s: %d \n", s);
-
-    double end2 = omp_get_wtime();
-    printf("Normal Time ex: %lf\n", (end - start));
-    printf("Reduction Time ex: %lf\n", (end2 - start2));
+if(argc>1){
+    n = atoi(argv[1]);
+    nThreads = atoi(argv[2]);
+}else{
+    n=N;
+    nThreads = NTHREADS;
 }
+
+double **a, **b, **c;
+
+a = (double**)malloc(n*sizeof(double*));
+b = (double**)malloc(n*sizeof(double*));
+c = (double**)malloc(n*sizeof(double*));
+
+for( x=0;x<n;x++){
+    a[x]=malloc(n*sizeof(double));
+    b[x]=malloc(n*sizeof(double));
+    c[x]=malloc(n*sizeof(double));
+}
+
+
+//initialization
+for (i=0;i<n;i++){
+    for (j=0;j<n;j++) {
+        a[i][j] = ((double) rand()*(5)/(double)RAND_MAX-2);
+        b[i][j] = ((double) rand()*(5)/(double)RAND_MAX-2);
+    }
+}
+
+//calculate prod
+double begin = omp_get_wtime();
+#pragma omp parallel private(i, j, k) num_threads(nThreads)
+{
+#pragma omp for
+ for (i=0;i<n;i++){ 
+        for(j=0;j<n;j++) {
+            c[i][j]=0;
+            for(k=0;k<n;k++) {   
+                c[i][j]=c[i][j]+a[i][k]*b[k][j];
+            }
+    }
+ }
+
+}
+double end = omp_get_wtime();
+ /*
+ printf("MATRIX - A\n");
+ for (i=0;i<n;i++) {
+    for(j=0;j<n;j++){ 
+        printf("%lf ", a[i][j]);                
+    }
+        printf("\n");
+ }
+printf("\n"); 
+
+
+  printf("MATRIX - B\n");
+ for (i=0;i<n;i++) {
+    for(j=0;j<n;j++) {
+        printf("%lf ", b[i][j]);                
+    }
+     printf("\n");
+ } 
+
+ printf("\n");
+printf("MATRIX - C (RESULT) \n");
+for (i=0;i<n;i++) {
+    for(j=0;j<n;j++) {
+        printf("%lf ", c[i][j]);                
+    }    
+        printf("\n");
+} 
+*/
+
+double time_spent = (end-begin);
+printf("Time exec: %f sec, Matrix size: %d, Number Threads: %d\n", time_spent, n,nThreads);
+
+}           
