@@ -4,9 +4,9 @@
 #define N 10
 
 
-int main(int argc, char **argv) {
+double main(int argc, char **argv) {
 clock_t begin = clock();
-int i,j,k, n;
+int i,j,k, n, x;
 
 if(argc>1){
     n = atoi(argv[1]);
@@ -14,24 +14,24 @@ if(argc>1){
     n=N;
 }
 
-int **a, **b, **c;
+double **a, **b, **c;
 
-a = (int**)malloc(n*sizeof(int*));
-b = (int**)malloc(n*sizeof(int*));
-c = (int**)malloc(n*sizeof(int*));
+a = (double**)malloc(n*sizeof(double*));
+b = (double**)malloc(n*sizeof(double*));
+c = (double**)malloc(n*sizeof(double*));
 
-for(int x=0;x<n;x++){
-    a[x]=malloc(n*sizeof(int));
-    b[x]=malloc(n*sizeof(int));
-    c[x]=malloc(n*sizeof(int));
+for( x=0;x<n;x++){
+    a[x]=malloc(n*sizeof(double));
+    b[x]=malloc(n*sizeof(double));
+    c[x]=malloc(n*sizeof(double));
 }
 
 
 //initialization
 for (i=0;i<n;i++){
     for (j=0;j<n;j++) {
-        a[i][j]= (int)rand()%5-2;
-        b[i][j]=(int)rand()%5-1;
+        a[i][j]= (double)rand()/5-2.0; //min -2 and max 2
+        b[i][j]=(double)rand()/5-1.0; //min -1 and max 3
     }
 }
 
@@ -44,32 +44,35 @@ for (i=0;i<n;i++){
             }
     }
  }
- /* printf("MATRIX - A\n");
+
+ /*
+ printf("MATRIX - A\n");
  for (i=0;i<n;i++) {
     for(j=0;j<n;j++){ 
-        printf("%d ", a[i][j]);                
+        printf("%lf ", a[i][j]);                
     }
         printf("\n");
  }
-printf("\n"); */
+printf("\n"); 
 
 
- /*  printf("MATRIX - B\n");
+  printf("MATRIX - B\n");
  for (i=0;i<n;i++) {
     for(j=0;j<n;j++) {
-        printf("%d ", b[i][j]);                
+        printf("%lf ", b[i][j]);                
     }
      printf("\n");
- } */
+ } 
 
-/* printf("\n");
+ printf("\n");
 printf("MATRIX - C (RESULT) \n");
 for (i=0;i<n;i++) {
     for(j=0;j<n;j++) {
-        printf("%d ", c[i][j]);                
+        printf("%lf ", c[i][j]);                
     }    
         printf("\n");
-} */
+} 
+*/
 clock_t end = clock();
 double time_spent = (double)(end-begin)/CLOCKS_PER_SEC;
 printf("Time exec: %f sec\n", time_spent);

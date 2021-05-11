@@ -5,25 +5,26 @@
 #include <time.h>
 
 #define N 1024
-void printMatrix(int mat[][N], int len)
+#define S 32
+void printMatrix(double **mat, int len)
 {
     for (int i = 0; i < len; i++) {
         for (int j = 0; j < len; j++) {
-            printf("\t%d", mat[i][j]);
+            printf("\t%f", mat[i][j]);
         }
         printf("\n");
     }
 }
 
-void matmul_tiled(int a[][N], int b[][N], int c[][N])
+void matmul_tiled(double **a, double **b, double **c, int n, int s)
 {
-    int s = 32;
+    
 #pragma omp parallel for 
-    for (int ih = 0; ih < N; ih += s)
+    for (int ih = 0; ih < n; ih += s)
     {
 #pragma omp parallel for simd
-        for (int jh = 0; jh < N; jh += s)
-            for (int kh = 0; kh < N; kh += s)
+        for (int jh = 0; jh < n; jh += s)
+            for (int kh = 0; kh < n; kh += s)
                 for (int il = 0; il < s; il++)
                     for (int kl = 0; kl < s; kl++)
                         for (int jl = 0; jl < s; jl++)
@@ -33,44 +34,49 @@ void matmul_tiled(int a[][N], int b[][N], int c[][N])
 
 int main(int argc, char** argv)
 {
-    // assert(argc == 2);
-    int mnl = N;
-    int matA[N][N], matB[N][N], matC[N][N];
-    int i, j, k;
+    
+    int n,s;
+    double **a, **b, **c;
+    int i, j, k,x;
     double begin;
     double time_spent;
 
-    for (i = 0; i < mnl; i++) {
-        for (j = 0; j < mnl; j++) {
-            matA[i][j] = i + j * 7 + 2;
-            matB[i][j] = j + i * 9 + 4;
-            matC[i][j] = 0;
+  if(argc>1){
+        n = atoi(argv[1]);
+        s = atoi(argv[2]);
+            }else{
+        n=N;
+        s=S;
+    }
+
+a = (double**)malloc(n*sizeof(double*));
+b = (double**)malloc(n*sizeof(double*));
+c = (double**)malloc(n*sizeof(double*));
+
+for( x=0;x<n;x++){
+    a[x]=malloc(n*sizeof(double));
+    b[x]=malloc(n*sizeof(double));
+    c[x]=malloc(n*sizeof(double));
+}
+
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            a[i][j] =  (double)rand()/5-2.0; //min -2 and max 2
+            b[i][j] = (double)rand()/5-1.0; //min -1 and max 3
         }
     }
 
-    /* printMatrix(matA, N);
+    /* printMatrix(a, n);
     printf("<---------------->\n");
-    printMatrix(matB, N);
-    printf("<---------------->\n"); */
+    printMatrix(b, n);
+    printf("<---------------->\n"); 
+    */
     begin = omp_get_wtime();
-
-/* #pragma omp parallel for
-    for (i = 0; i < mnl; i++) {
-        for (k = 0; k < mnl; k++)
-            for (j = 0; j < mnl; j++) {
-                matC[i][j] += matA[i][k] * matB[k][j];
-            }
-    } */
-
-        matmul_tiled(matA,matB,matC);
-    
-        
-
+    matmul_tiled(a,b,c,n,s);
     double end = omp_get_wtime();
     time_spent = (end - begin);
-    printf("\nMatrix size %d, time spent %lf s\n\n", N, time_spent);
-  
-    /* printMatrix(matC, N);
-     printf("<---------------->\n"); */
+    //printMatrix(c, N);
+    //printf("<---------------->\n"); 
+    printf("\nMatrix size %d, tile size %d time spent %lf s\n\n", n,s, time_spent);
     return 0;
 }
