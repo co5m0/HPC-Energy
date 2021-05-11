@@ -16,11 +16,11 @@ void printMatrix(double **mat, int len)
 }
 int main(int argc, char **argv)
 {
-srand(1);
+    srand(1);
     
     int i, j, k, n;
-   
     double somma = 0;
+
     if (argc > 1)
     {
         n = atoi(argv[1]);
@@ -58,9 +58,9 @@ srand(1);
     //calculate prod
     double begin = omp_get_wtime();
 
-    #pragma omp parallel 
+    #pragma omp parallel private(i, j)
     {
-    #pragma omp parallel for simd reduction(+ \
+    #pragma omp parallel for simd  reduction(+ \
                                                 : somma)
     for (i = 0; i < n; i++)
     {
@@ -82,5 +82,5 @@ srand(1);
     free(a);
     free(b);
     printf("Result sum: %f\n", somma);
-    printf("Time exec: %f sec, Matrix size: %d\n", time_spent,n);
+    printf("Time exec: %f sec, Matrix size: %d\n", time_spent, n);
 }
