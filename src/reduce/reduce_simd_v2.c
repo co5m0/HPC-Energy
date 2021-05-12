@@ -58,20 +58,18 @@ int main(int argc, char **argv)
     //calculate prod
     double begin = omp_get_wtime();
 
-    #pragma omp parallel private(i, j)
+    #pragma omp parallel private(i, j) 
     {
-    #pragma omp parallel for simd  reduction(+ \
-                                                : somma)
-    for (i = 0; i < n; i++)
-    {
+      #pragma omp for simd reduction(+:somma) 
+      for (i = 0; i < n; i++)
+      {
         for (j = 0; j < n; j++)
         {
             somma = somma + a[i][j] * b[i][j];
         }
+      }
     }
-    
-    }
-    
+
     double end = omp_get_wtime();
     double time_spent = (end - begin);
     /*printf("<-------------<\n");
