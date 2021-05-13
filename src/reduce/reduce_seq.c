@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+
+#include "rapllib.h"
+
 #define N 1024
 
 void printMatrix(float **mat, int len)
@@ -20,6 +23,12 @@ int main(int argc, char **argv)
 
     int i, j, k, n;
     float somma = 0;
+
+    Rapl_info rapl = new_rapl_info();
+    detect_cpu(rapl);
+    detect_packages(rapl);
+    rapl_sysfs(rapl);
+
     if (argc > 1)
     {
         n = atoi(argv[1]);
@@ -53,6 +62,8 @@ int main(int argc, char **argv)
 
     //calculate prod
     clock_t begin = clock();
+    rapl_sysfs_start(rapl);
+
     for (i = 0; i < n; i++)
     {
         for (j = 0; j < n; j++)
@@ -60,7 +71,10 @@ int main(int argc, char **argv)
             somma = somma + a[i][j] * b[i][j];
         }
     }
+
+    rapl_sysfs_stop(rapl);
     clock_t end = clock();
+
     float time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     /*printf("<-------------<\n");
     printMatrix(a, n);

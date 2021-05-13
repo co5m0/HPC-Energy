@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "rapllib.h"
+
 #define N 1024
 #define S 32
 void printMatrix(float **mat, int len)
@@ -42,6 +44,11 @@ int main(int argc, char **argv)
     int i, j, k, x;
     double begin;
     double time_spent;
+       
+    Rapl_info rapl = new_rapl_info();
+    detect_cpu(rapl);
+    detect_packages(rapl);
+    rapl_sysfs(rapl);
 
     if (argc > 1)
     {
@@ -79,9 +86,15 @@ int main(int argc, char **argv)
     printMatrix(b, n);
     printf("<---------------->\n"); 
     */
+    
     begin = omp_get_wtime();
+    rapl_sysfs_start(rapl);
+
     matmul_tiled(a, b, c, n, s);
+
+    rapl_sysfs_stop(rapl);
     double end = omp_get_wtime();
+    
     time_spent = (end - begin);
     //printMatrix(c, N);
     //printf("<---------------->\n");

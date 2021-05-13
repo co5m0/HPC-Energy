@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
     srand(1);
     int i, j, k, n, x;
     int nThreads;
+
     Rapl_info rapl = new_rapl_info();
     detect_cpu(rapl);
     detect_packages(rapl);
@@ -58,6 +59,7 @@ int main(int argc, char **argv) {
     //calculate prod
     double begin = omp_get_wtime();
     rapl_sysfs_start(rapl);
+    
 #pragma omp parallel private(i, j, k) num_threads(nThreads)
     {
 #pragma omp for
@@ -70,6 +72,7 @@ int main(int argc, char **argv) {
             }
         }
     }
+
     rapl_sysfs_stop(rapl);
     double end = omp_get_wtime();
 

@@ -2,6 +2,9 @@
 #include <time.h>
 #include <stdlib.h>
 #include <omp.h>
+
+#include "rapllib.h"
+
 #define N 1024
 #define NTHREADS 4
 
@@ -23,6 +26,12 @@ int main(int argc, char **argv)
     int i, j, k, n;
     int nThreads;
     float somma = 0;
+    
+    Rapl_info rapl = new_rapl_info();
+    detect_cpu(rapl);
+    detect_packages(rapl);
+    rapl_sysfs(rapl);
+
     if (argc > 1)
     {
         n = atoi(argv[1]);
@@ -58,6 +67,8 @@ int main(int argc, char **argv)
 
     //calculate prod
     double begin = omp_get_wtime();
+    rapl_sysfs_start(rapl);
+
 #pragma omp parallel for num_threads(nThreads) private(i, j) reduction(+ \
                                                                        : somma)
     for (i = 0; i < n; i++)
@@ -67,7 +78,10 @@ int main(int argc, char **argv)
             somma = somma + a[i][j] * b[i][j];
         }
     }
+
+    rapl_sysfs_stop(rapl);
     double end = omp_get_wtime();
+    
     double time_spent = (end - begin);
     /*printf("<-------------<\n");
     printMatrix(a,n);
