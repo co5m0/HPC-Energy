@@ -6,20 +6,22 @@
 
 #define N 1024
 #define S 32
-void printMatrix(double **mat, int len)
+void printMatrix(float **mat, int len)
 {
-    for (int i = 0; i < len; i++) {
-        for (int j = 0; j < len; j++) {
+    for (int i = 0; i < len; i++)
+    {
+        for (int j = 0; j < len; j++)
+        {
             printf("\t%f", mat[i][j]);
         }
         printf("\n");
     }
 }
 
-void matmul_tiled(double **a, double **b, double **c, int n, int s)
+void matmul_tiled(float **a, float **b, float **c, int n, int s)
 {
-    
-#pragma omp parallel for 
+
+#pragma omp parallel for
     for (int ih = 0; ih < n; ih += s)
     {
 #pragma omp parallel for simd
@@ -32,37 +34,43 @@ void matmul_tiled(double **a, double **b, double **c, int n, int s)
     }
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     srand(1);
-    int n,s;
-    double **a, **b, **c;
-    int i, j, k,x;
+    int n, s;
+    float **a, **b, **c;
+    int i, j, k, x;
     double begin;
     double time_spent;
 
-  if(argc>1){
+    if (argc > 1)
+    {
         n = atoi(argv[1]);
         s = atoi(argv[2]);
-            }else{
-        n=N;
-        s=S;
+    }
+    else
+    {
+        n = N;
+        s = S;
     }
 
-a = (double**)malloc(n*sizeof(double*));
-b = (double**)malloc(n*sizeof(double*));
-c = (double**)malloc(n*sizeof(double*));
+    a = (float **)malloc(n * sizeof(float *));
+    b = (float **)malloc(n * sizeof(float *));
+    c = (float **)malloc(n * sizeof(float *));
 
-for( x=0;x<n;x++){
-    a[x]=malloc(n*sizeof(double));
-    b[x]=malloc(n*sizeof(double));
-    c[x]=malloc(n*sizeof(double));
-}
+    for (x = 0; x < n; x++)
+    {
+        a[x] = malloc(n * sizeof(float));
+        b[x] = malloc(n * sizeof(float));
+        c[x] = malloc(n * sizeof(float));
+    }
 
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) {
-            a[i][j] = ((double) rand()*(5)/(double)RAND_MAX-2);
-            b[i][j] = ((double) rand()*(5)/(double)RAND_MAX-2);
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < n; j++)
+        {
+            a[i][j] = ((float)rand() * (5) / (float)RAND_MAX - 2);
+            b[i][j] = ((float)rand() * (5) / (float)RAND_MAX - 2);
         }
     }
 
@@ -72,11 +80,11 @@ for( x=0;x<n;x++){
     printf("<---------------->\n"); 
     */
     begin = omp_get_wtime();
-    matmul_tiled(a,b,c,n,s);
+    matmul_tiled(a, b, c, n, s);
     double end = omp_get_wtime();
     time_spent = (end - begin);
     //printMatrix(c, N);
-    //printf("<---------------->\n"); 
-    printf("Time exec: %f sec, Matrix size: %d, Tile size: %d  s\n\n",time_spent,n,s);
+    //printf("<---------------->\n");
+    printf("Time exec: %f sec, Matrix size: %d, Tile size: %d  s\n\n", time_spent, n, s);
     return 0;
 }
