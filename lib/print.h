@@ -17,7 +17,7 @@ void print_file(char *name, double time, int size, double energy, int nThreads) 
     //If it is empty it is initialized with the label names
     if (s == 0) {
         printf("Empty File... Initialization!\n");
-        fprintf(f, "%s, %s, %s, %s\n", "NAMEFILE", "TIME", "SIZE", "ENERGY", "NTHREAD");
+        fprintf(f, "%s, %s, %s, %s, %s\n", "NAMEFILE", "TIME", "SIZE", "ENERGY", "NTHREAD");
     }
 
     //Saving values ​​in csv file
