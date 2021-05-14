@@ -2,7 +2,7 @@
  * 
  * gcc -O2 -Wall  -c rapllib.c
  * 
- * gcc -o main.out rapllib.o  matrix_mul_multi.c -lm -fopenmp
+ * gcc -o main.out ../../lib/rapllib.o  matrix_mul_multi.c -lm -fopenmp
  * 
  * sudo ./main.out
  * 
@@ -13,7 +13,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "rapllib.h"
+#include "../../lib/print.h"
+#include "../../lib/rapllib.h"
 
 #define N 1024
 #define NTHREADS 4
@@ -59,7 +60,7 @@ int main(int argc, char **argv) {
     //calculate prod
     double begin = omp_get_wtime();
     rapl_sysfs_start(rapl);
-    
+
 #pragma omp parallel private(i, j, k) num_threads(nThreads)
     {
 #pragma omp for
@@ -75,7 +76,7 @@ int main(int argc, char **argv) {
 
     rapl_sysfs_stop(rapl);
     double end = omp_get_wtime();
-
     double time_spent = (end - begin);
     printf("Time exec: %f sec, Matrix size: %d, Number Threads: %d\n", time_spent, n, nThreads);
+    print_file(__FILE__, time_spent, n, rapl_get_energy(rapl), nThreads);
 }

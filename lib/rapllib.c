@@ -803,3 +803,21 @@ int rapl_sysfs_stop(Rapl_info rapl) {
     printf("\n");
     return 0;
 }
+
+double rapl_get_energy(Rapl_info rapl) {
+    int i, j;
+    double energy = 0.0;
+    for (j = 0; j < rapl->total_packages; j++) {
+        printf("\tPackage %d\n", j);
+        for (i = 0; i < NUM_RAPL_DOMAINS; i++) {
+            if (rapl->sysfs_valid[j][i]) {
+                if (!strcmp(rapl->sysfs_event_names[j][i], "package-0"))
+                    energy = ((double)rapl->sysfs_after[j][i] - (double)rapl->sysfs_before[j][i]) / 1000000.0;
+                printf("\t\t%s\t: %lfJ\n", rapl->sysfs_event_names[j][i],
+                       ((double)rapl->sysfs_after[j][i] - (double)rapl->sysfs_before[j][i]) / 1000000.0);
+            }
+        }
+    }
+
+    return energy;
+}

@@ -20,6 +20,7 @@ int main(int argc, char const *argv[]) {
         int stop = rapl_sysfs_stop(rapl);
         printf("\n\n----- LOG ALL -----\n\n");
         log_rapl_info(rapl);
+        printf("\n\n GET ENERGY %lf\n\n", rapl_get_energy(rapl));
     }
 
     return 0;

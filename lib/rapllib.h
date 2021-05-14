@@ -145,3 +145,4 @@ int rapl_sysfs(Rapl_info rapl);
 int rapl_sysfs_start(Rapl_info rapl);
 int rapl_sysfs_stop(Rapl_info rapl);
 void log_rapl_info(Rapl_info rapl);
+double rapl_get_energy(Rapl_info rapl);
