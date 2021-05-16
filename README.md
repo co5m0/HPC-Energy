@@ -4,7 +4,7 @@ Repository for HPC project
 
 ## Run the `src/` programs
 
-1. Go to `lib/` folfer and run the `make` command
+1. Go to `lib/` folder and run the `make` command
 2. Go inside the topic folder in `src/` ("matrix_mul" or "reduce")
 3. Compile the program with:
    `gcc -o main.out ../../lib/rapllib.o <source_file>.c -lm -fopenmp -O2`
