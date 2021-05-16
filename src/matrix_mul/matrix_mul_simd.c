@@ -4,28 +4,25 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "rapllib.h"
+#include "../../lib/print.h"
+#include "../../lib/rapllib.h"
 
 #define N 1024
 #define S 32
-void printMatrix(float **mat, int len)
-{
-    for (int i = 0; i < len; i++)
-    {
-        for (int j = 0; j < len; j++)
-        {
+#define NTHREADS 4
+
+void printMatrix(float **mat, int len) {
+    for (int i = 0; i < len; i++) {
+        for (int j = 0; j < len; j++) {
             printf("\t%f", mat[i][j]);
         }
         printf("\n");
     }
 }
 
-void matmul_tiled(float **a, float **b, float **c, int n, int s)
-{
-
-#pragma omp parallel for
-    for (int ih = 0; ih < n; ih += s)
-    {
+void matmul_tiled(float **a, float **b, float **c, int n, int s, int nThreads) {
+#pragma omp parallel for num_threads(nThreads)
+    for (int ih = 0; ih < n; ih += s) {
 #pragma omp parallel for simd
         for (int jh = 0; jh < n; jh += s)
             for (int kh = 0; kh < n; kh += s)
@@ -36,46 +33,42 @@ void matmul_tiled(float **a, float **b, float **c, int n, int s)
     }
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     srand(1);
     int n, s;
     float **a, **b, **c;
-    int i, j, k, x;
+    int i, j, x;
     double begin;
     double time_spent;
-       
+    int nThreads;
+
     Rapl_info rapl = new_rapl_info();
     detect_cpu(rapl);
     detect_packages(rapl);
     rapl_sysfs(rapl);
 
-    if (argc > 1)
-    {
+    if (argc > 1) {
         n = atoi(argv[1]);
         s = atoi(argv[2]);
-    }
-    else
-    {
+        nThreads = atoi(argv[3]);
+    } else {
         n = N;
         s = S;
+        nThreads = NTHREADS;
     }
 
     a = (float **)malloc(n * sizeof(float *));
     b = (float **)malloc(n * sizeof(float *));
     c = (float **)malloc(n * sizeof(float *));
 
-    for (x = 0; x < n; x++)
-    {
+    for (x = 0; x < n; x++) {
         a[x] = malloc(n * sizeof(float));
         b[x] = malloc(n * sizeof(float));
         c[x] = malloc(n * sizeof(float));
     }
 
-    for (i = 0; i < n; i++)
-    {
-        for (j = 0; j < n; j++)
-        {
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
             a[i][j] = ((float)rand() * (5) / (float)RAND_MAX - 2);
             b[i][j] = ((float)rand() * (5) / (float)RAND_MAX - 2);
         }
@@ -86,18 +79,19 @@ int main(int argc, char **argv)
     printMatrix(b, n);
     printf("<---------------->\n"); 
     */
-    
+
     begin = omp_get_wtime();
     rapl_sysfs_start(rapl);
 
-    matmul_tiled(a, b, c, n, s);
+    matmul_tiled(a, b, c, n, s, nThreads);
 
     rapl_sysfs_stop(rapl);
     double end = omp_get_wtime();
-    
+
     time_spent = (end - begin);
     //printMatrix(c, N);
     //printf("<---------------->\n");
     printf("Time exec: %f sec, Matrix size: %d, Tile size: %d  s\n\n", time_spent, n, s);
+    print_file(__FILE__, time_spent, n, rapl_get_energy(rapl), nThreads);
     return 0;
 }
