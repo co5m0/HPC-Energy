@@ -1,0 +1,14 @@
+NAMEFILE, TIME, SIZE, ENERGY, NTHREAD
+matrix_mul_seq.c, 10.077200, 1024, 312.033897, 1
+matrix_mul_seq.c, 9.976896, 1024, 305.525246, 1
+matrix_mul_seq.c, 96.571869, 2048, 3032.486425, 1
+matrix_mul_seq.c, 1006.159265, 4096, -33786.886801, 1
+matrix_mul_multi.c, 4.972956, 1024, 148.495525, 2
+matrix_mul_multi.c, 2.686779, 1024, 86.754180, 4
+matrix_mul_multi.c, 1.261180, 1024, 52.515107, 8
+matrix_mul_multi.c, 46.726140, 2048, 1460.602887, 2
+matrix_mul_multi.c, 24.448377, 2048, 865.134703, 4
+matrix_mul_multi.c, 12.871830, 2048, 551.501662, 8
+matrix_mul_multi.c, 487.276756, 4096, 15378.716475, 2
+matrix_mul_multi.c, 252.645149, 4096, 8995.338642, 4
+matrix_mul_multi.c, 130.581178, 4096, 5722.386869, 8
