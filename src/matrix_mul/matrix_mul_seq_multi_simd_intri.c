@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
     rapl_sysfs_stop(rapl);
     dtime += omp_get_wtime();
     printf("time %f\n", dtime);
-    print_file("SEQ", dtime, n, rapl_get_energy(rapl), nThreads);
+    print_file("SEQ", dtime, n, rapl_get_energy(rapl), 1);
 
     dtime = -omp_get_wtime();
     rapl_sysfs_start(rapl);
