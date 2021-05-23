@@ -2,21 +2,18 @@
 #include <time.h>
 #include <stdlib.h>
 
-#include "rapllib.h"
+#include "../../lib/print.h"
+#include "../../lib/rapllib.h"
 
 #define N 1024
 
-void printMatrix(float **mat, int len)
+void printMatrix(float *mat, int len)
 {
-    for (int i = 0; i < len; i++)
-    {
-        for (int j = 0; j < len; j++)
-        {
-            printf("\t%f", mat[i][j]);
-        }
-        printf("\n");
+    for (int i = 0; i < len; i++){
+        printf("\t%f", mat[i]);
     }
 }
+
 int main(int argc, char **argv)
 {
     srand(1);
@@ -83,4 +80,5 @@ int main(int argc, char **argv)
     */
     printf("Result sum: %f\n", somma);
     printf("Time exec: %f sec, Matrix size: %d\n", time_spent, n);
+    print_file("reduce_seq", time_spent, n, rapl_get_energy(rapl), 1);
 }

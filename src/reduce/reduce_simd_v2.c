@@ -3,9 +3,12 @@
 #include <stdlib.h>
 #include <omp.h>
 
-#include "rapllib.h"
+#include "../../lib/print.h"
+#include "../../lib/rapllib.h"
 
 #define N 1024
+#define NTHREADS 4
+
 
 void printMatrix(float **mat, int len)
 {
@@ -18,11 +21,12 @@ void printMatrix(float **mat, int len)
         printf("\n");
     }
 }
+
 int main(int argc, char **argv)
 {
     srand(1);
 
-    int i, j, k, n;
+    int i, j, k, n, nThreads;
     float somma = 0;
     
     Rapl_info rapl = new_rapl_info();
@@ -30,13 +34,20 @@ int main(int argc, char **argv)
     detect_packages(rapl);
     rapl_sysfs(rapl);
 
-    if (argc > 1)
+    if (argc == 2)
     {
         n = atoi(argv[1]);
+        nThreads = NTHREADS;
     }
     else
     {
-        n = N;
+        if (argc == 3){
+            n = atoi(argv[1]);
+            nThreads = atoi(argv[2]);
+        }else{
+            n = N;
+            nThreads = NTHREADS;
+        }
     }
 
     float **a, **b, **c;
@@ -91,4 +102,5 @@ int main(int argc, char **argv)
     free(b);
     printf("Result sum: %f\n", somma);
     printf("Time exec: %f sec, Matrix size: %d\n", time_spent, n);
+    print_file("reduce_simd", time_spent, n, rapl_get_energy(rapl), nThreads);
 }
