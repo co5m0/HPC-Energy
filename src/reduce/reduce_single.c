@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <omp.h>
 
-#include "rapllib.h"
+#include "../../lib/print.h"
+#include "../../lib/rapllib.h"
 
 #define N 1024
 
@@ -86,4 +87,5 @@ int main(int argc, char **argv)
     */
     printf("Result sum: %f\n", somma);
     printf("Time exec: %f sec, Matrix size: %d, Number Threads: 1\n", time_spent, n);
+    print_file("reduce_single", time_spent, n, rapl_get_energy(rapl), 1);
 }
