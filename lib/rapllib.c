@@ -10,7 +10,9 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
+#include <sys/time.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 // typedef struct rapl_info_s {
@@ -54,6 +56,12 @@ Rapl_info new_rapl_info() {
     rapl->different_units = 0;
 
     return rapl;
+}
+
+Rapl_power_info new_rapl_power_info(void) {
+    Rapl_power_info rapl_power = malloc(sizeof(rapl_info_power_s));
+
+    return rapl_power;
 }
 
 void log_rapl_info(Rapl_info rapl) {
@@ -470,87 +478,6 @@ int rapl_msr(int core, Rapl_info rapl) {
         close(fd);
     }
     printf("\n");
-
-    // for (j = 0; j < rapl->total_packages; j++) {
-    //     fd = open_msr(rapl->package_map[j]);
-
-    //     /* Package Energy */
-    //     result = read_msr(fd, rapl->msr_pkg_energy_status);
-    //     rapl->package_before[j] = (double)result * rapl->cpu_energy_units[j];
-
-    //     /* PP0 energy */
-    //     /* Not available on Knights* */
-    //     /* Always returns zero on Haswell-EP? */
-    //     if (rapl->pp0_avail) {
-    //         result = read_msr(fd, rapl->msr_pp0_energy_status);
-    //         rapl->pp0_before[j] = (double)result * rapl->cpu_energy_units[j];
-    //     }
-
-    //     /* PP1 energy */
-    //     /* not available on *Bridge-EP */
-    //     if (rapl->pp1_avail) {
-    //         result = read_msr(fd, MSR_PP1_ENERGY_STATUS);
-    //         rapl->pp1_before[j] = (double)result * rapl->cpu_energy_units[j];
-    //     }
-
-    //     /* Updated documentation (but not the Vol3B) says Haswell and	*/
-    //     /* Broadwell have DRAM support too				*/
-    //     if (rapl->dram_avail) {
-    //         result = read_msr(fd, MSR_DRAM_ENERGY_STATUS);
-    //         rapl->dram_before[j] = (double)result * rapl->dram_energy_units[j];
-    //     }
-
-    //     /* Skylake and newer for Psys				*/
-    //     if (rapl->psys_avail) {
-    //         result = read_msr(fd, MSR_PLATFORM_ENERGY_STATUS);
-    //         rapl->psys_before[j] = (double)result * rapl->cpu_energy_units[j];
-    //     }
-
-    //     close(fd);
-    // }
-
-    // printf("\n\tSleeping 1 second\n\n");
-    // sleep(1);
-
-    // for (j = 0; j < rapl->total_packages; j++) {
-    //     fd = open_msr(rapl->package_map[j]);
-
-    //     printf("\tPackage %d:\n", j);
-
-    //     result = read_msr(fd, rapl->msr_pkg_energy_status);
-    //     rapl->package_after[j] = (double)result * rapl->cpu_energy_units[j];
-    //     printf("\t\tPackage energy: %.6fJ\n",
-    //            rapl->package_after[j] - rapl->package_before[j]);
-
-    //     result = read_msr(fd, rapl->msr_pp0_energy_status);
-    //     rapl->pp0_after[j] = (double)result * rapl->cpu_energy_units[j];
-    //     printf("\t\tPowerPlane0 (cores): %.6fJ\n",
-    //            rapl->pp0_after[j] - rapl->pp0_before[j]);
-
-    //     /* not available on SandyBridge-EP */
-    //     if (rapl->pp1_avail) {
-    //         result = read_msr(fd, MSR_PP1_ENERGY_STATUS);
-    //         rapl->pp1_after[j] = (double)result * rapl->cpu_energy_units[j];
-    //         printf("\t\tPowerPlane1 (on-core GPU if avail): %.6f J\n",
-    //                rapl->pp1_after[j] - rapl->pp1_before[j]);
-    //     }
-
-    //     if (rapl->dram_avail) {
-    //         result = read_msr(fd, MSR_DRAM_ENERGY_STATUS);
-    //         rapl->dram_after[j] = (double)result * rapl->dram_energy_units[j];
-    //         printf("\t\tDRAM: %.6fJ\n",
-    //                rapl->dram_after[j] - rapl->dram_before[j]);
-    //     }
-
-    //     if (rapl->psys_avail) {
-    //         result = read_msr(fd, MSR_PLATFORM_ENERGY_STATUS);
-    //         rapl->psys_after[j] = (double)result * rapl->cpu_energy_units[j];
-    //         printf("\t\tPSYS: %.6fJ\n",
-    //                rapl->psys_after[j] - rapl->psys_before[j]);
-    //     }
-
-    //     close(fd);
-    // }
     printf("\n");
     printf("Note: the energy measurements can overflow in 60s or so\n");
     printf("      so try to sample the counters more often than that.\n\n");
@@ -704,51 +631,6 @@ int rapl_sysfs(Rapl_info rapl) {
                     basename[j], j, i - 1);
         }
     }
-
-    /* Gather before values */
-    // for (j = 0; j < rapl->total_packages; j++) {
-    //     for (i = 0; i < NUM_RAPL_DOMAINS; i++) {
-    //         if (valid[j][i]) {
-    //             fff = fopen(filenames[j][i], "r");
-    //             if (fff == NULL) {
-    //                 fprintf(stderr, "\tError opening %s!\n", filenames[j][i]);
-    //             } else {
-    //                 fscanf(fff, "%lld", &before[j][i]);
-    //                 fclose(fff);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // printf("\tSleeping 1 second\n\n");
-    // sleep(1);
-
-    /* Gather after values */
-    // for (j = 0; j < rapl->total_packages; j++) {
-    //     for (i = 0; i < NUM_RAPL_DOMAINS; i++) {
-    //         if (valid[j][i]) {
-    //             fff = fopen(filenames[j][i], "r");
-    //             if (fff == NULL) {
-    //                 fprintf(stderr, "\tError opening %s!\n", filenames[j][i]);
-    //             } else {
-    //                 fscanf(fff, "%lld", &after[j][i]);
-    //                 fclose(fff);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // for (j = 0; j < rapl->total_packages; j++) {
-    //     printf("\tPackage %d\n", j);
-    //     for (i = 0; i < NUM_RAPL_DOMAINS; i++) {
-    //         if (valid[j][i]) {
-    //             printf("\t\t%s\t: %lfJ\n", event_names[j][i],
-    //                    ((double)after[j][i] - (double)before[j][i]) / 1000000.0);
-    //         }
-    //     }
-    // }
-    // printf("\n");
-
     return 0;
 }
 
@@ -820,4 +702,190 @@ double rapl_get_energy(Rapl_info rapl) {
     }
 
     return energy;
+}
+
+int rapl_power_sysfs(Rapl_info rapl, Rapl_power_info rapl_power) {
+    char event_names[MAX_PACKAGES][NUM_RAPL_DOMAINS][256];
+    char filenames[MAX_PACKAGES][NUM_RAPL_DOMAINS][256];
+    char basename[MAX_PACKAGES][256];
+    char tempfile[256];
+    long long before[MAX_PACKAGES][NUM_RAPL_DOMAINS];
+    int valid[MAX_PACKAGES][NUM_RAPL_DOMAINS];
+    int i, j;
+    FILE *fff;
+
+    /* /sys/class/powercap/intel-rapl/intel-rapl:0/ */
+    /* name has name */
+    /* energy_uj has energy */
+    /* subdirectories intel-rapl:0:0 intel-rapl:0:1 intel-rapl:0:2 */
+
+    for (j = 0; j < rapl->total_packages; j++) {
+        i = 0;
+        sprintf(basename[j], "/sys/class/powercap/intel-rapl/intel-rapl:%d",
+                j);
+        sprintf(tempfile, "%s/name", basename[j]);
+        fff = fopen(tempfile, "r");
+        if (fff == NULL) {
+            fprintf(stderr, "\tCould not open %s\n", tempfile);
+            return -1;
+        }
+        fscanf(fff, "%s", event_names[j][i]);
+        valid[j][i] = 1;
+        fclose(fff);
+        sprintf(filenames[j][i], "%s/energy_uj", basename[j]);
+
+        /* Handle subdomains */
+        for (i = 1; i < NUM_RAPL_DOMAINS; i++) {
+            sprintf(tempfile, "%s/intel-rapl:%d:%d/name",
+                    basename[j], j, i - 1);
+            fff = fopen(tempfile, "r");
+            if (fff == NULL) {
+                //fprintf(stderr,"\tCould not open %s\n",tempfile);
+                valid[j][i] = 0;
+                continue;
+            }
+            valid[j][i] = 1;
+            fscanf(fff, "%s", event_names[j][i]);
+            fclose(fff);
+            sprintf(filenames[j][i], "%s/intel-rapl:%d:%d/energy_uj",
+                    basename[j], j, i - 1);
+        }
+    }
+
+    /* Gather before values */
+    for (j = 0; j < rapl->total_packages; j++) {
+        for (i = 0; i < NUM_RAPL_DOMAINS; i++) {
+            if (valid[j][i]) {
+                fff = fopen(filenames[j][i], "r");
+                if (fff == NULL) {
+                    fprintf(stderr, "\tError opening %s!\n", filenames[j][i]);
+                } else {
+                    fscanf(fff, "%lld", &before[j][i]);
+                    fclose(fff);
+                }
+            }
+        }
+    }
+
+    for (j = 0; j < rapl->total_packages; j++) {
+        for (i = 0; i < NUM_RAPL_DOMAINS; i++) {
+            if (valid[j][i]) {
+                if (!strncmp("package", event_names[j][i], 7)) {
+                    rapl_power->package_energy[j] = before[j][i] / 1000000.0;
+                } else if (!strcmp("core", event_names[j][i])) {
+                    rapl_power->cores_energy[j] = before[j][i] / 1000000.0;
+                } else if (!strcmp("uncore", event_names[j][i])) {
+                    rapl_power->uncore_energy[j] = before[j][i] / 1000000.0;
+                } else if (!strcmp("dram", event_names[j][i])) {
+                    rapl_power->dram_energy[j] = before[j][i] / 1000000.0;
+                } else {
+                    printf("Unknown %s\n", event_names[j][i]);
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+void read_power(Rapl_info rapl, Rapl_power_info rapl_power, int delay, int total_time, char *source_file_name) {
+    printf("read power\n");
+    // Init power struct
+    int core = 0;
+    int result = -1;
+    int cpu_model;
+    int use_sysfs = 0, use_perf_event = 0, use_msr = 0;
+    int j;
+    int first_time = 1;
+    int delay_micro_sec = delay * 1000;
+
+    struct timeval current_time;
+    double ct, lt, ot;
+
+    char f_name[15];
+
+    FILE *f;
+    // Open output file
+    sprintf(f_name, "%s_power_%u.csv", source_file_name, time(NULL));
+    if ((f = fopen(f_name, "a+")) == NULL) {
+        printf("Errore opening file...\n");
+    }
+
+    gettimeofday(&current_time, NULL);
+    lt = current_time.tv_sec + (current_time.tv_usec / 1000000.0);
+    ot = lt;
+    for (j = 0; j < rapl->total_packages; j++) {
+        rapl_power->last_package[j] = rapl_power->package_energy[j];
+        rapl_power->last_cores[j] = rapl_power->cores_energy[j];
+        rapl_power->last_uncore[j] = rapl_power->uncore_energy[j];
+        rapl_power->last_dram[j] = rapl_power->dram_energy[j];
+        rapl_power->last_psys[j] = rapl_power->psys_energy[j];
+    }
+
+    // Print csv header
+    printf("Time (s)|\t");
+    for (j = 0; j < rapl->total_packages; j++) {
+        if (available & PACKAGE) printf("Package%d(W)|\t", j);
+        if (available & PACKAGE) fprintf(f, "Package%d(W)|\t", j);
+        if (available & CORES) printf("Cores(W)|\t");
+        if (available & CORES) fprintf(f, "Cores(W)|\t");
+        if (available & UNCORE) printf("GPU(W)|\t");
+        if (available & UNCORE) fprintf(f, "GPU(W|,\t");
+        if (available & DRAM) printf("DRAM(W)|\t");
+        if (available & DRAM) fprintf(f, "DRAM(W)|\t");
+        if (available & PSYS) printf("Psys(W)|\t\n");
+        if (available & PSYS) fprintf(f, "Psys(W)|\t\n");
+    }
+    // While 1
+    int i = 0;
+    int total_iterations = (int)((total_time * 1000) / delay) + 1;
+    while (i < total_iterations) {
+        gettimeofday(&current_time, NULL);
+        ct = current_time.tv_sec + (current_time.tv_usec / 1000000.0);
+
+        rapl_power_sysfs(rapl, rapl_power);
+
+        if (first_time) {
+            first_time = 0;
+        } else {
+            printf("%lf\t", ct - ot);
+            for (j = 0; j < rapl->total_packages; j++) {
+                if (available & PACKAGE) printf("%lf,\t",
+                                                (rapl_power->package_energy[j] - rapl_power->last_package[j]) / (ct - lt));
+                if (available & CORES) printf("%lf,\t",
+                                              (rapl_power->cores_energy[j] - rapl_power->last_cores[j]) / (ct - lt));
+                if (available & UNCORE) printf("%lf,\t",
+                                               (rapl_power->uncore_energy[j] - rapl_power->last_uncore[j]) / (ct - lt));
+                if (available & DRAM) printf("%lf,\t",
+                                             (rapl_power->dram_energy[j] - rapl_power->last_dram[j]) / (ct - lt));
+                if (available & PSYS) printf("%lf,\t",
+                                             (rapl_power->psys_energy[j] - rapl_power->last_psys[j]) / (ct - lt));
+                if (available & PACKAGE) fprintf(f, "%lf|\t",
+                                                 (rapl_power->package_energy[j] - rapl_power->last_package[j]) / (ct - lt));
+                if (available & CORES) fprintf(f, "%lf|\t",
+                                               (rapl_power->cores_energy[j] - rapl_power->last_cores[j]) / (ct - lt));
+                if (available & UNCORE) fprintf(f, "%lf|\t",
+                                                (rapl_power->uncore_energy[j] - rapl_power->last_uncore[j]) / (ct - lt));
+                if (available & DRAM) fprintf(f, "%lf|\t",
+                                              (rapl_power->dram_energy[j] - rapl_power->last_dram[j]) / (ct - lt));
+                if (available & PSYS) fprintf(f, "%lf|\t",
+                                              (rapl_power->psys_energy[j] - rapl_power->last_psys[j]) / (ct - lt));
+            }
+            fprintf(f, "\n");
+            printf("\n");
+        }
+        usleep(delay_micro_sec);
+        lt = ct;
+        for (j = 0; j < rapl->total_packages; j++) {
+            rapl_power->last_package[j] = rapl_power->package_energy[j];
+            rapl_power->last_cores[j] = rapl_power->cores_energy[j];
+            rapl_power->last_uncore[j] = rapl_power->uncore_energy[j];
+            rapl_power->last_dram[j] = rapl_power->dram_energy[j];
+            rapl_power->last_psys[j] = rapl_power->psys_energy[j];
+        }
+        fflush(stdout);
+        i++;
+    }
+
+    fclose(f);
 }

@@ -82,6 +82,14 @@
 #define MAX_CPUS 1024
 #define MAX_PACKAGES 16
 
+#define PACKAGE 1
+#define CORES 2
+#define UNCORE 4
+#define DRAM 8
+#define PSYS 16
+
+#define available (PACKAGE | CORES | UNCORE | DRAM | PSYS)
+
 #define NUM_RAPL_DOMAINS 5
 typedef struct rapl_info_s {
     unsigned int msr_rapl_units;
@@ -107,7 +115,17 @@ typedef struct rapl_info_s {
     int dram_avail, pp0_avail, pp1_avail, psys_avail;
     int different_units;
 } rapl_info_s;
+
+typedef struct rapl_info_power_s {
+    double package_energy[MAX_PACKAGES], last_package[MAX_PACKAGES];
+    double cores_energy[MAX_PACKAGES], last_cores[MAX_PACKAGES];
+    double uncore_energy[MAX_PACKAGES], last_uncore[MAX_PACKAGES];
+    double dram_energy[MAX_PACKAGES], last_dram[MAX_PACKAGES];
+    double psys_energy[MAX_PACKAGES], last_psys[MAX_PACKAGES];
+} rapl_info_power_s;
+
 typedef struct rapl_info_s *Rapl_info;
+typedef struct rapl_info_power_s *Rapl_power_info;
 
 /**
  * @brief Detect the CPU vendor (Intel, AMD), CPU family, CPU model.
@@ -134,6 +152,7 @@ int detect_cpu(Rapl_info);
  */
 Rapl_info new_rapl_info(void);
 
+Rapl_power_info new_rapl_power_info(void);
 // long long read_msr(int fd, unsigned int which);
 
 int detect_cpu(Rapl_info rapl);
@@ -146,3 +165,17 @@ int rapl_sysfs_start(Rapl_info rapl);
 int rapl_sysfs_stop(Rapl_info rapl);
 void log_rapl_info(Rapl_info rapl);
 double rapl_get_energy(Rapl_info rapl);
+int rapl_power_sysfs(Rapl_info rapl, Rapl_power_info rapl_power);
+/**
+ * @brief Read the power.
+ *
+ * @note This function reads the powe values and write the results in a csv file
+ * 
+ * @param rapl Rapl_info structure
+ * @param rapl_power Rapl_poer_info struct
+ * @param delay delay between power readings in msec
+ * @param tatal_time how many seconds the power reading last in sec
+ * @param source_file_name name of the output csv file
+ * @return 
+ */
+void read_power(Rapl_info rapl, Rapl_power_info rapl_power, int delay, int total_time, char *source_file_name);

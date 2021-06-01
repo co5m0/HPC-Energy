@@ -7,7 +7,7 @@ TARGET = main.out
 
 
 $(TARGET):	$(MAINOBJECT) $(LIBOBJECT)
-	$(CC) -o $(TARGET) $(LIBOBJECT) $(MAINOBJECT) $(LFLAGS)
+	$(CC) -o $(TARGET) $(LIBOBJECT) -g $(MAINOBJECT) $(LFLAGS)
 
 $(LIBOBJECT):	rapllib.c
 	$(CC) $(CFLAGS) -c rapllib.c
