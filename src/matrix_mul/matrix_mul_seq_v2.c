@@ -68,8 +68,9 @@ int main(int argc, char **argv) {
     float *a = _mm_malloc(n * n * sizeof *a, 64);
     float *b = _mm_malloc(n * n * sizeof *b, 64);
     float *c1 = _mm_malloc(n * n * sizeof *c1, 64);
-    float *c2 = _mm_malloc(n * n * sizeof *c2, 64);
-    float *c3 = _mm_malloc(n * n * sizeof *c2, 64);
+    //float *c2 = _mm_malloc(n * n * sizeof *c2, 64);
+    //float *c3 = _mm_malloc(n * n * sizeof *c2, 64);
+
     Rapl_info rapl = new_rapl_info();
     Rapl_power_info rapl_power = new_rapl_power_info();
     detect_cpu(rapl);
@@ -78,8 +79,8 @@ int main(int argc, char **argv) {
     for (int i = 0; i < n * n; i++) a[i] = 1.0 * i;
     for (int i = 0; i < n * n; i++) b[i] = 1.0 * i;
     memset(c1, 0, n * n * sizeof *c1);
-    memset(c2, 0, n * n * sizeof *c2);
-    memset(c3, 0, n * n * sizeof *c3);
+    //memset(c2, 0, n * n * sizeof *c2);
+    //memset(c3, 0, n * n * sizeof *c3);
     double dtime;
 
     sprintf(file_out_name, "seq_%d_%d", n, 1);
@@ -92,7 +93,9 @@ int main(int argc, char **argv) {
     } else if (proc > 0) {
         dtime = -omp_get_wtime();
         rapl_sysfs_start(rapl);
+
         gemm(a, b, c1, n);
+
         rapl_sysfs_stop(rapl);
         dtime += omp_get_wtime();
 
@@ -105,51 +108,5 @@ int main(int argc, char **argv) {
         read_power(rapl, rapl_power, 200, 10, file_out_name);
     }
 
-    sprintf(file_out_name, "multi_%d_%d", n, 1);
-
-    // --> copy from here
-    proc = fork();
-    if (proc < 0) {
-        fprintf(stderr, "fork Failed");
-        return 1;
-    } else if (proc > 0) {
-        dtime = -omp_get_wtime();
-        rapl_sysfs_start(rapl);
-        gemm_tlp(a, b, c2, n);
-        rapl_sysfs_stop(rapl);
-        dtime += omp_get_wtime();
-
-        wait(0);
-
-        printf("time %f\n", dtime);
-        print_file("test_with_power.csv", "MULTI", dtime, n, rapl_get_energy(rapl), nThreads);
-    } else {  //child
-        rapl_power_sysfs(rapl, rapl_power);
-        read_power(rapl, rapl_power, 200, 10, file_out_name);
-    }
-
-    sprintf(file_out_name, "simd_%d_%d", n, 1);
-
-    proc = fork();
-    if (proc < 0) {
-        fprintf(stderr, "fork Failed");
-        return 1;
-    } else if (proc > 0) {
-        dtime = -omp_get_wtime();
-        rapl_sysfs_start(rapl);
-        gemm_tlp_simd(a, b, c3, n);
-        rapl_sysfs_stop(rapl);
-        dtime += omp_get_wtime();
-
-        wait(0);
-
-        printf("time %f\n", dtime);
-        print_file("test_with_power.csv", "SIMD", dtime, n, rapl_get_energy(rapl), nThreads);
-    } else {  //child
-        rapl_power_sysfs(rapl, rapl_power);
-        read_power(rapl, rapl_power, 200, 10, file_out_name);
-    }
-
-    printf("error %d\n", memcmp(c1, c2, n * n * sizeof *c1));
-    printf("error %d\n", memcmp(c1, c3, n * n * sizeof *c1));
+    return 0;
 }
