@@ -802,7 +802,7 @@ void read_power(Rapl_info rapl, Rapl_power_info rapl_power, int delay, int total
     struct timeval current_time;
     double ct, lt, ot;
 
-    char f_name[15];
+    char f_name[55];
 
     FILE *f;
     // Open output file
