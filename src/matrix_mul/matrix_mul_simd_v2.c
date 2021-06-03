@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
 
     
 
-    sprintf(file_out_name, "simd_%d_%d", n, 1);
+    sprintf(file_out_name, "simd_%d_%d", n, nThreads);
 
     proc = fork();
     if (proc < 0) {
@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
         print_file("test_with_power.csv", "SIMD", dtime, n, rapl_get_energy(rapl), nThreads);
     } else {  //child
         rapl_power_sysfs(rapl, rapl_power);
-        read_power(rapl, rapl_power, 200, 10, file_out_name);
+        read_power(rapl, rapl_power, 200, 9, file_out_name);
     }
 
     return 0;

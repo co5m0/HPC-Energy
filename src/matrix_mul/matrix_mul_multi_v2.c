@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
     double dtime;
 
 
-    sprintf(file_out_name, "multi_%d_%d", n, 1);
+    sprintf(file_out_name, "multi_%d_%d", n, nThreads);
 
     // --> copy from here
     proc = fork();
@@ -106,7 +106,8 @@ int main(int argc, char **argv) {
         print_file("test_with_power.csv", "MULTI", dtime, n, rapl_get_energy(rapl), nThreads);
     } else {  //child
         rapl_power_sysfs(rapl, rapl_power);
-        read_power(rapl, rapl_power, 200, 10, file_out_name);
+        read_power(rapl, rapl_power, 200, 13, file_out_name);
+
     }
 
     return 0;
