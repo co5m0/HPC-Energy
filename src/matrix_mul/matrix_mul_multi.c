@@ -50,7 +50,9 @@ int main(int argc, char **argv) {
     sprintf(file_out_name, "multi_%d_%d", n, nThreads);
 
     float **a, **b, **c;
-
+    
+#pragma omp parallel num_threads(1)
+    {
     a = (float **)malloc(n * sizeof(float *));
     b = (float **)malloc(n * sizeof(float *));
     c = (float **)malloc(n * sizeof(float *));
@@ -67,6 +69,7 @@ int main(int argc, char **argv) {
             a[i][j] = ((float)rand() * (5) / (float)RAND_MAX - 2);
             b[i][j] = ((float)rand() * (5) / (float)RAND_MAX - 2);
         }
+    }
     }
 
     // --> copy from here

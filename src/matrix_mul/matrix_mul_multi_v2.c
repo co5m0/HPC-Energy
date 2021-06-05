@@ -76,11 +76,20 @@ int main(int argc, char **argv) {
     detect_cpu(rapl);
     detect_packages(rapl);
     rapl_sysfs(rapl);
+
+#pragma omp parallel for num_threads(1)
     for (int i = 0; i < n * n; i++) a[i] = 1.0 * i;
+
+#pragma omp parallel for num_threads(1)
     for (int i = 0; i < n * n; i++) b[i] = 1.0 * i;
+
+#pragma omp parallel num_threads(1)
+    {
     //memset(c1, 0, n * n * sizeof *c1);
     memset(c2, 0, n * n * sizeof *c2);
+    }
     //memset(c3, 0, n * n * sizeof *c3);
+  
     double dtime;
 
 
@@ -106,7 +115,7 @@ int main(int argc, char **argv) {
         print_file("test_with_power.csv", "MULTI", dtime, n, rapl_get_energy(rapl), nThreads);
     } else {  //child
         rapl_power_sysfs(rapl, rapl_power);
-        read_power(rapl, rapl_power, 200, 13, file_out_name);
+        read_power(rapl, rapl_power, 200, 20, file_out_name);
 
     }
 

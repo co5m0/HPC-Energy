@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
         print_file("test_with_power.csv", "SEQ", dtime, n, rapl_get_energy(rapl), 1);
     } else {  //child
         rapl_power_sysfs(rapl, rapl_power);
-        read_power(rapl, rapl_power, 200, 60, file_out_name);
+        read_power(rapl, rapl_power, 200, 58, file_out_name);
     }
 
     return 0;
