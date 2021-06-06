@@ -1,7 +1,10 @@
-#include <stdio.h>
-#include <time.h>
-#include <stdlib.h>
 #include <omp.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <x86intrin.h>
 
 #include "../../lib/print.h"
 #include "../../lib/rapllib.h"
@@ -28,8 +31,14 @@ int main(int argc, char **argv)
 
     int i, j, k, n, nThreads;
     float somma = 0;
+
+    // --> declare proc var
+    int proc;
+    // --> declare file output file var
+    char file_out_name[25];
     
     Rapl_info rapl = new_rapl_info();
+    Rapl_power_info rapl_power = new_rapl_power_info();
     detect_cpu(rapl);
     detect_packages(rapl);
     rapl_sysfs(rapl);
@@ -55,12 +64,14 @@ int main(int argc, char **argv)
     a = (float **)malloc(n * sizeof(float *));
     b = (float **)malloc(n * sizeof(float *));
 
+#pragma omp parallel for num_threads(1)
     for (int x = 0; x < n; x++)
     {
         a[x] = malloc(n * sizeof(float));
         b[x] = malloc(n * sizeof(float));
     }
 
+#pragma omp parallel for num_threads(1)
     //initialization
     for (i = 0; i < n; i++)
     {
@@ -73,8 +84,18 @@ int main(int argc, char **argv)
     //printf("RANDOM: %f\n",(float)rand()/ 5 - 2.0);
 
     //calculate prod
-    double begin = omp_get_wtime();
-    rapl_sysfs_start(rapl);
+    double dtime;
+
+    sprintf(file_out_name, "reduce_simd_%d_%d", n, nThreads);
+
+    proc = fork();
+    if (proc < 0) {
+        fprintf(stderr, "fork Failed");
+        return 1;
+    } else if (proc > 0) {
+        dtime = -omp_get_wtime();
+
+        rapl_sysfs_start(rapl);
 
 #pragma omp parallel private(i, j)
     {
@@ -89,18 +110,19 @@ int main(int argc, char **argv)
         }
     }
 
-    rapl_sysfs_stop(rapl);
-    double end = omp_get_wtime();
-    
-    double time_spent = (end - begin);
-    /*printf("<-------------<\n");
-    printMatrix(a,n);
-    printf("<-------------<\n");
-    printMatrix(b,n);
-    */
-    free(a);
-    free(b);
-    printf("Result sum: %f\n", somma);
-    printf("Time exec: %f sec, Matrix size: %d\n", time_spent, n);
-    print_file("reduce_simd", time_spent, n, rapl_get_energy(rapl), nThreads);
+        rapl_sysfs_stop(rapl);
+        dtime += omp_get_wtime();
+
+        wait(0);
+
+        //printf("Result sum: %f\n", somma);
+
+        printf("time %f\n", dtime);
+        print_file("test_with_power.csv", "DOT-PRODUCT SIMD", dtime, n, rapl_get_energy(rapl), nThreads);
+        
+    } else {  //child
+        rapl_power_sysfs(rapl, rapl_power);
+        read_power(rapl, rapl_power, 200, 5, file_out_name);
+    }
+    return 0;
 }

@@ -1,6 +1,10 @@
+#include <omp.h>
 #include <stdio.h>
-#include <time.h>
-#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <x86intrin.h>
 
 #include "../../lib/print.h"
 #include "../../lib/rapllib.h"
@@ -19,9 +23,16 @@ int main(int argc, char **argv)
     srand(1);
 
     int i, j, k, n;
+    int nThreads = 1;
     float somma = 0;
 
+    // --> declare proc var
+    int proc;
+    // --> declare file output file var
+    char file_out_name[25];
+
     Rapl_info rapl = new_rapl_info();
+    Rapl_power_info rapl_power = new_rapl_power_info();
     detect_cpu(rapl);
     detect_packages(rapl);
     rapl_sysfs(rapl);
@@ -57,28 +68,42 @@ int main(int argc, char **argv)
     }
     //printf("RANDOM: %f\n",(float)rand()/ 5 - 2.0);
 
-    //calculate prod
-    clock_t begin = clock();
-    rapl_sysfs_start(rapl);
+    double dtime;
 
-    for (i = 0; i < n; i++)
-    {
-        for (j = 0; j < n; j++)
+    sprintf(file_out_name, "reduce_seq_%d_%d", n, nThreads);
+
+    // --> copy from here
+    proc = fork();
+    if (proc < 0) {
+        fprintf(stderr, "fork Failed");
+        return 1;
+    } else if (proc > 0) {
+        dtime = -omp_get_wtime();
+
+        rapl_sysfs_start(rapl);
+
+        for (i = 0; i < n; i++)
         {
-            somma = somma + a[i][j] * b[i][j];
+            for (j = 0; j < n; j++)
+            {
+                somma = somma + a[i][j] * b[i][j];
+            }
         }
+
+        rapl_sysfs_stop(rapl);
+        dtime += omp_get_wtime();
+
+        wait(0);
+
+        //printf("Result sum: %f\n", somma);
+
+        printf("time %f\n", dtime);
+        print_file("test_with_power.csv", "DOT-PRODUCT SEQ", dtime, n, rapl_get_energy(rapl), 1);
+
+    } else {  //child
+        rapl_power_sysfs(rapl, rapl_power);
+        read_power(rapl, rapl_power, 200, 5, file_out_name);
+
     }
-
-    rapl_sysfs_stop(rapl);
-    clock_t end = clock();
-
-    float time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    /*printf("<-------------<\n");
-    printMatrix(a, n);
-    printf("<-------------<\n");
-    printMatrix(b, n);
-    */
-    printf("Result sum: %f\n", somma);
-    printf("Time exec: %f sec, Matrix size: %d\n", time_spent, n);
-    print_file("reduce_seq", time_spent, n, rapl_get_energy(rapl), 1);
+    return 0;
 }
