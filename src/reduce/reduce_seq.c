@@ -58,6 +58,7 @@ int main(int argc, char **argv)
     }
 
     //initialization
+#pragma omp parallel for num_threads(1)
     for (i = 0; i < n; i++)
     {
         for (j = 0; j < n; j++)
@@ -102,7 +103,7 @@ int main(int argc, char **argv)
 
     } else {  //child
         rapl_power_sysfs(rapl, rapl_power);
-        read_power(rapl, rapl_power, 200, 5, file_out_name);
+        read_power(rapl, rapl_power, 100, 1, file_out_name);
 
     }
     return 0;

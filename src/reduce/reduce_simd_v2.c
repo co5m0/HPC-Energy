@@ -61,8 +61,11 @@ int main(int argc, char **argv)
 
     float **a, **b, **c;
 
+#pragma omp parallel num_threads(1)
+    {
     a = (float **)malloc(n * sizeof(float *));
     b = (float **)malloc(n * sizeof(float *));
+    }
 
 #pragma omp parallel for num_threads(1)
     for (int x = 0; x < n; x++)
@@ -122,7 +125,7 @@ int main(int argc, char **argv)
         
     } else {  //child
         rapl_power_sysfs(rapl, rapl_power);
-        read_power(rapl, rapl_power, 200, 5, file_out_name);
+        read_power(rapl, rapl_power, 200, 2, file_out_name);
     }
     return 0;
 }
