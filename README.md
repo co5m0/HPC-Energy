@@ -4,9 +4,9 @@ Repository for HPC project
 
 ## Repository structure
 
-- `lib`: headers file
-- `src`: source files used for benchmark
-- `results`: csv files with the benchmark results
+- [`lib`](./lib): headers file
+- [`src`](./src): source files used for benchmark
+- [`results`](./results): csv files with the benchmark results
 
 ## Run the `src/` programs
 
