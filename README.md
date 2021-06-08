@@ -14,7 +14,7 @@ Repository for HPC project
 2. Go inside the topic folder in `src/` ("_matrix_mul_" or "_reduce_")
 3. Compile the program with:
    `gcc -o main.out ../../lib/rapllib.o <source_file>.c -lm -fopenmp -O2`
-4. Run `main.out` as **sudo**: `sudo ./main.out <param1> <param2>`
+4. Run `main.out` as **sudo**: `sudo ./main.out <matrix_side_size> <number_of_threads>`
 
 ## Test CPU specs
 
